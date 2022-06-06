@@ -83,5 +83,5 @@ func (o *Output) outputPath(outputName, derivationName, partialDrvHash string) (
 		digest = h.Sum(nil)
 	}
 
-	return filepath.Join(nixpath.StoreDir, nixbase32.EncodeToString(hash.CompressHash(digest, 20))+"-"+outputSuffix), nil
+	return nixpath.Absolute(nixbase32.EncodeToString(hash.CompressHash(digest, 20)) + "-" + outputSuffix), nil
 }

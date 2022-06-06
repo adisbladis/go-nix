@@ -3,7 +3,6 @@ package derivation
 import (
 	"crypto/sha256"
 	"encoding/hex"
-	"path/filepath"
 	"sort"
 
 	"github.com/nix-community/go-nix/pkg/hash"

@@ -8,6 +8,52 @@ import (
 // Alphabet contains the list of valid characters for the Nix base32 alphabet.
 const Alphabet = "0123456789abcdfghijklmnpqrsvwxyz"
 
+// nolint:gochecknoglobals
+// This creates an array to check if a given byte is in the Nix base32 alphabet.
+var isNixBase32 = func() (arr [256]bool) {
+	for _, c := range Alphabet {
+		arr[c] = true
+	}
+
+	return
+}()
+
+// ValidateString validates if a byte slice is valid nixbase32.
+func Validate(b []byte) error {
+	return ValidateString(string(b))
+}
+
+// ValidateString validates if a string is valid nixbase32.
+func ValidateString(s string) error {
+	dstLen := DecodedLen(len(s))
+
+	for n := 0; n < len(s); n++ {
+		c := s[len(s)-n-1]
+
+		digit := strings.IndexByte(Alphabet, c)
+		if digit == -1 {
+			return fmt.Errorf("character %v not in alphabet", c)
+		}
+
+		b := uint(n * 5)
+		i := b / 8
+		j := b % 8
+
+		// calculate the "carry pattern"
+		carry := byte(digit) >> (8 - j)
+
+		// if we're at the end of dst…
+		if i == uint(dstLen-1) {
+			// but have a nonzero carry, the encoding is invalid.
+			if carry != 0 {
+				return fmt.Errorf("invalid encoding")
+			}
+		}
+	}
+
+	return nil
+}
+
 // EncodedLen returns the length in bytes of the base32 encoding of an input
 // buffer of length n.
 func EncodedLen(n int) int {
